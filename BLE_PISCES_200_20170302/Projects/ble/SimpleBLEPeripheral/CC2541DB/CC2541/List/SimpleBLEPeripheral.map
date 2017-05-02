@@ -1,0 +1,8 @@
+Error[e16]: Segment FLASH_LOCK_BITS (size: 0x20a align: 0) is too long for segment definition. At least 0x20a more bytes needed. The problem occurred while processing the segment placement command "-Z(CODE)FLASH_LOCK_BITS=_FLASH_LOCK_BITS_START-_FLASH_LOCK_BITS_END", where at the moment of placement the available memory ranges were "-none-"
+   Reserved ranges relevant to this placement:
+   CODE:7fff0-7ffff     INTVEC
+   BIT:0-7              BREG
+   BIT:80-97            SFR_AN
+   BIT:a0-af            SFR_AN
+   BIT:b8-c7            SFR_AN
+   BIT:e8-ef            SFR_AN
