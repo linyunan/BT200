@@ -9,7 +9,7 @@ TriggerName=main
 LimitSize=0
 ByteLimit=50
 [DebugChecksum]
-Checksum=-831342102
+Checksum=-481127027
 [CallStack]
 ShowArgs=0
 [Disassembly]
@@ -24,8 +24,8 @@ LogFile=_ ""
 [Breakpoints]
 Bp0=_ "STD_CODE" "{$PROJ_DIR$}.437.14" 0 0 0 0 "" 0 ""
 Bp1=_ "STD_CODE" "{$PROJ_DIR$}.140.4" 0 0 0 0 "" 0 ""
-Bp2=_ "STD_CODE" "{$PROJ_DIR$\..\Source\Bledoorlock.c}.1123.5" 1 0 0 0 "" 0 ""
-Bp3=_ "STD_CODE" "{$PROJ_DIR$\..\Source\Bledoorlock.c}.1613.15" 1 0 0 0 "" 0 ""
+Bp2=_ "STD_CODE" "{$PROJ_DIR$\..\Source\Bledoorlock.c}.1129.5" 1 0 0 0 "" 0 ""
+Bp3=_ "STD_CODE" "{$PROJ_DIR$\..\Source\Bledoorlock.c}.1734.17" 1 0 0 0 "" 0 ""
 Count=4
 [ChipconEmu]
 Stop timers on halt=0

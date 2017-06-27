@@ -841,6 +841,12 @@ uint16 BleDoorLock_ProcessEvent( uint8 task_id, uint16 events )
         
         osal_set_event(bleDoorLock_TaskID, DOOR_BATTERY_EVT);
         
+        uint8 Lock_OC[1] = {0x00};
+        osal_snv_read(0xF0, 1, Lock_OC); 
+        if(Lock_OC[0] == 0x01)  // 关锁情况下按键才有效
+        {
+          PWM_Pulse(50, 0, 0);
+        }
 //        osal_set_event(bleDoorLock_TaskID, DOOR_PERIODIC_EVT);
         // 断开所有连接
 //        GAPRole_TerminateConnection();
@@ -1067,7 +1073,7 @@ uint16 BleDoorLock_ProcessEvent( uint8 task_id, uint16 events )
     {
       global_var.openDoorTurn ++;
       Motor_Foreward();
-      osal_start_timerEx(bleDoorLock_TaskID, DOOR_OPENDOOR_EVT, 60);
+      osal_start_timerEx(bleDoorLock_TaskID, DOOR_OPENDOOR_EVT, 160);
     }
     
     else if(global_var.openDoorTurn == 1)
@@ -1097,7 +1103,7 @@ uint16 BleDoorLock_ProcessEvent( uint8 task_id, uint16 events )
     {
       global_var.openDoorTurn ++;
       Motor_Backward();
-      osal_start_timerEx(bleDoorLock_TaskID, DOOR_CLOSEDOOR_EVT, 40);
+      osal_start_timerEx(bleDoorLock_TaskID, DOOR_CLOSEDOOR_EVT, 140);
     }
     
     else if(global_var.openDoorTurn == 1)
@@ -1260,44 +1266,47 @@ static void bleDoorLock_HandleKeys( uint8 shift, uint8 keys )
 
   if(Power_OnOff == PowerOn )
   {
-     
-    if( keys == HAL_KEY_SW_1)             // 按键功能
+    uint8 Lock_OC[1] = {0x00};
+    osal_snv_read(0xF0, 1, Lock_OC); 
+    if(Lock_OC[0] == 0x00)  // 关锁情况下按键才有效
     {
-      global_var.key_down = TRUE;
-      // 2S 任务
-      PWM_Pulse(0, 0, 50);    // 蓝色
-      //osal_start_timerEx( bleDoorLock_TaskID, DOOR_KEY_LONG_EVT, 300 );  
-      osal_stop_timerEx( bleDoorLock_TaskID, DOOR_OUTTIME_EVT );  // 
-      osal_start_timerEx( bleDoorLock_TaskID, DOOR_2S_EVT, 1500 );
-      
-    }
-    else if(global_var.key_down == TRUE)
-    {
-      PWM_Pulse(0, 0, 0);  // 
-      global_var.key_down = FALSE;
-      osal_stop_timerEx( bleDoorLock_TaskID, DOOR_2S_EVT );
-//      osal_stop_timerEx( bleDoorLock_TaskID, DOOR_KEY_LONG_EVT );
-      if(global_var.key_2s == 0)
+      if( keys == HAL_KEY_SW_1)             // 按键功能
       {
-        global_var.key_num++;
-        if(global_var.key_num > 9)
+        global_var.key_down = TRUE;
+        // 2S 任务
+        PWM_Pulse(0, 0, 50);    // 蓝色
+        //osal_start_timerEx( bleDoorLock_TaskID, DOOR_KEY_LONG_EVT, 300 );  
+        osal_stop_timerEx( bleDoorLock_TaskID, DOOR_OUTTIME_EVT );  // 
+        osal_start_timerEx( bleDoorLock_TaskID, DOOR_2S_EVT, 1500 );
+        
+      }
+      else if(global_var.key_down == TRUE)
+      {
+        PWM_Pulse(0, 0, 0);  // 
+        global_var.key_down = FALSE;
+        osal_stop_timerEx( bleDoorLock_TaskID, DOOR_2S_EVT );
+  //      osal_stop_timerEx( bleDoorLock_TaskID, DOOR_KEY_LONG_EVT );
+        if(global_var.key_2s == 0)
         {
-          global_var.key_num = 9;
+          global_var.key_num++;
+          if(global_var.key_num > 9)
+          {
+            global_var.key_num = 9;
+          }
+          osal_start_timerEx( bleDoorLock_TaskID, DOOR_OUTTIME_EVT, 1500 );  // 间隔 2 秒
         }
-        osal_start_timerEx( bleDoorLock_TaskID, DOOR_OUTTIME_EVT, 1500 );  // 间隔 2 秒
-      }
 
-      else
-      {
-        osal_stop_timerEx( bleDoorLock_TaskID, DOOR_OUTTIME_EVT );  // 间隔 2 秒
-        global_var.key_2s = 0;
-      }
-     }        
-    
-     osal_start_timerEx( bleDoorLock_TaskID, DOOR_POWERONOFF_EVT, 8000 );  
+        else
+        {
+          osal_stop_timerEx( bleDoorLock_TaskID, DOOR_OUTTIME_EVT );  // 间隔 2 秒
+          global_var.key_2s = 0;
+        }
+       }        
+      
+       osal_start_timerEx( bleDoorLock_TaskID, DOOR_POWERONOFF_EVT, 8000 );  
 
+    }
   }
-  
   if( keys == HAL_KEY_SW_2 )
   {
     if(Lock_OC[0] != 0)      // 非零锁开的状态   0 锁关状态
@@ -1697,6 +1706,10 @@ static void doorProfileChangeCB( uint8 paramID )
                 }
               }
             }
+            else
+            {
+              DoorProfile_SetParameter(DOORPROFILE_CHAR2, 16, Updoor_open);      // 锁开了
+            }
           }
           break;
           
@@ -1787,6 +1800,10 @@ static void doorProfileChangeCB( uint8 paramID )
                   }
                 }
               }
+            }
+            else
+            {
+              DoorProfile_SetParameter(DOORPROFILE_CHAR2, 16, Updoor_open);      // 锁开了
             }
           }
           break;
